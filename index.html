@@ -1,110 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ADHD Support App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+<div class="max-w-2xl mx-auto p-6">
+
+  <!-- LOGIN -->
+  <div id="loginScreen">
+    <h1 class="text-3xl font-bold mb-4">Welcome</h1>
+    <input id="email" class="w-full p-2 mb-2 border" placeholder="Email">
+    <input id="password" type="password" class="w-full p-2 mb-4 border" placeholder="Password">
+
+    <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 mr-2">Login</button>
+    <button onclick="signup()" class="bg-green-500 text-white px-4 py-2">Sign Up</button>
+  </div>
+
+  <!-- PROBLEMS -->
+  <div id="problemScreen" class="hidden">
+    <h2 class="text-2xl font-bold mb-4">What are you struggling with?</h2>
+
+    <label><input type="checkbox" value="focus"> Can't focus</label><br>
+    <label><input type="checkbox" value="procrastination"> Procrastination</label><br>
+    <label><input type="checkbox" value="forgetfulness"> Forget tasks</label>
+
+    <button onclick="saveProblems()" class="mt-4 bg-blue-500 text-white px-4 py-2">
+      Get Techniques
+    </button>
+  </div>
+
+  <!-- TECHNIQUES -->
+  <div id="techniqueScreen" class="hidden">
+    <h2 class="text-2xl font-bold mb-4">Recommended Techniques</h2>
+    <ul id="techniqueList" class="space-y-3"></ul>
+
+    <button onclick="goToProgress()" class="mt-6 bg-purple-500 text-white px-4 py-2">
+      View Progress
+    </button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="progressScreen" class="hidden">
+    <h2 class="text-2xl font-bold mb-4">Your Progress</h2>
+
+    <p id="pointsDisplay"></p>
+    <p id="tasksDisplay"></p>
+    <p id="streakDisplay"></p>
+
+    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2">
+      Logout
+    </button>
+  </div>
+
+</div>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { 
-    getFirestore, collection, addDoc, getDocs, query, where 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  import { 
-    getAuth, onAuthStateChanged 
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+/* 🔥 FIREBASE SETUP */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
-  // 🔹 Your Firebase config
-  const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-  };
+import {
+  getFirestore, collection, addDoc, getDocs,
+  query, where, updateDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+import {
+  getAuth, onAuthStateChanged, signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  let currentUser = null;
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+};
 
-  // Track logged-in user
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUser = user;
-      console.log("Logged in:", user.uid);
-    } else {
-      currentUser = null;
-    }
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+
+/* 🔐 AUTH (anonymous for now) */
+signInAnonymously(auth);
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    showScreen("problemScreen");
+  }
+});
+
+/* 📅 DATE HELPERS */
+function getToday() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function getYesterday() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split("T")[0];
+}
+
+/* 🔥 SAVE PROBLEMS */
+async function saveProblemsToFirestore(problems) {
+  try {
+    await addDoc(collection(db, "userProblems"), {
+      uid: currentUser.uid,
+      problems,
+      points: 0,
+      completedTasks: 0,
+      streak: 0,
+      lastCompletedDate: null
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/* 🔥 UPDATE STREAK */
+async function updateStreak(docRef, data) {
+  const today = getToday();
+  const yesterday = getYesterday();
+
+  let streak = data.streak || 0;
+
+  if (data.lastCompletedDate === today) return streak;
+
+  if (data.lastCompletedDate === yesterday) {
+    streak += 1;
+  } else {
+    streak = 1;
+  }
+
+  await updateDoc(docRef, {
+    streak,
+    lastCompletedDate: today
   });
 
-  /* ---------------- FIRESTORE FUNCTIONS ---------------- */
+  return streak;
+}
 
-  // ✅ SAVE DATA
-  async function saveProblemsToFirestore(problems) {
-    try {
-      if (!currentUser) throw new Error("User not logged in");
+/* 🎯 COMPLETE TASK */
+window.completeTask = async function () {
+  const q = query(
+    collection(db, "userProblems"),
+    where("uid", "==", currentUser.uid)
+  );
 
-      await addDoc(collection(db, "userProblems"), {
-        uid: currentUser.uid,   // REQUIRED ✅
-        problems: problems,
-        points: 0,
-        completedTasks: 0,
-        createdAt: new Date()
-      });
+  const snapshot = await getDocs(q);
 
-      console.log("Data saved to Firestore");
-    } catch (error) {
-      console.error("Error saving:", error);
-    }
-  }
+  snapshot.forEach(async (docSnap) => {
+    const data = docSnap.data();
+    const docRef = doc(db, "userProblems", docSnap.id);
 
-  // ✅ FETCH DATA
-  async function loadUserData() {
-    try {
-      if (!currentUser) throw new Error("User not logged in");
+    const streak = await updateStreak(docRef, data);
 
-      const q = query(
-        collection(db, "userProblems"),
-        where("uid", "==", currentUser.uid)
-      );
+    await updateDoc(docRef, {
+      points: (data.points || 0) + 10,
+      completedTasks: (data.completedTasks || 0) + 1
+    });
 
-      const querySnapshot = await getDocs(q);
+    alert(`+10 points 🎉\n🔥 Streak: ${streak}`);
+  });
+};
 
-      let totalPoints = 0;
-      let totalTasks = 0;
+/* 📊 LOAD PROGRESS */
+async function loadUserData() {
+  const q = query(
+    collection(db, "userProblems"),
+    where("uid", "==", currentUser.uid)
+  );
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        totalPoints += data.points || 0;
-        totalTasks += data.completedTasks || 0;
-      });
+  const snapshot = await getDocs(q);
 
-      // Update UI
-      document.getElementById("pointsDisplay").innerText =
-        "Total Points: " + totalPoints;
+  let points = 0;
+  let tasks = 0;
+  let streak = 0;
 
-      document.getElementById("tasksDisplay").innerText =
-        "Tasks Completed: " + totalTasks;
+  snapshot.forEach((doc) => {
+    const d = doc.data();
+    points += d.points || 0;
+    tasks += d.completedTasks || 0;
+    streak = Math.max(streak, d.streak || 0);
+  });
 
-    } catch (error) {
-      console.error("Error fetching:", error);
-    }
-  }
+  document.getElementById("pointsDisplay").innerText = "Points: " + points;
+  document.getElementById("tasksDisplay").innerText = "Tasks: " + tasks;
+  document.getElementById("streakDisplay").innerText = "🔥 Streak: " + streak + " days";
+}
 
-  /* ---------------- CONNECT TO YOUR EXISTING UI ---------------- */
+/* ---------------- UI LOGIC ---------------- */
 
-  // Override your existing function
-  window.saveProblems = async function () {
-    const selected = Array.from(
-      document.querySelectorAll("input[type=checkbox]:checked")
-    ).map(cb => cb.value);
+let userData = { problems: [] };
 
-    userData.problems = selected;
+const solutions = {
+  focus: ["Pomodoro Technique", "Noise-canceling headphones"],
+  procrastination: ["5-minute rule", "Break tasks small"],
+  forgetfulness: ["Write tasks immediately", "Use reminders"]
+};
 
-    // 🔥 Save to Firestore
-    await saveProblemsToFirestore(selected);
+function showScreen(id) {
+  document.querySelectorAll("div[id$='Screen']")
+    .forEach(d => d.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
 
-    showTechniques();
-  };
+window.saveProblems = async function () {
+  const selected = [...document.querySelectorAll("input:checked")]
+    .map(cb => cb.value);
 
-  // Override progress loader
-  window.goToProgress = async function () {
-    await loadUserData();
-    showScreen("progressScreen");
-  };
+  userData.problems = selected;
+
+  await saveProblemsToFirestore(selected);
+
+  showTechniques();
+};
+
+function showTechniques() {
+  const list = document.getElementById("techniqueList");
+  list.innerHTML = "";
+
+  userData.problems.forEach(p => {
+    solutions[p].forEach(t => {
+      const li = document.createElement("li");
+      li.className = "bg-white p-3 rounded shadow flex justify-between";
+
+      li.innerHTML = `
+        <span>${t}</span>
+        <button onclick="completeTask()" class="bg-green-500 text-white px-2 py-1">
+          Done
+        </button>
+      `;
+
+      list.appendChild(li);
+    });
+  });
+
+  showScreen("techniqueScreen");
+}
+
+window.goToProgress = async function () {
+  await loadUserData();
+  showScreen("progressScreen");
+};
+
+window.login = () => {};
+window.signup = () => {};
+window.logout = () => location.reload();
 
 </script>
+
+</body>
+</html>
