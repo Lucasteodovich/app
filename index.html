@@ -1,201 +1,54 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>ADHD Support App</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+    .box { background: white; padding: 15px; margin: 10px 0; }
+    button { margin-top: 10px; }
+    .hidden { display: none; }
+  </style>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body>
 
-<div class="max-w-2xl mx-auto p-6">
+<div id="loginScreen">
+  <h1>Welcome</h1>
+  <input id="email" placeholder="Email"><br><br>
+  <input id="password" type="password" placeholder="Password"><br><br>
 
-  <!-- LOGIN -->
-  <div id="loginScreen">
-    <h1 class="text-3xl font-bold mb-4">Welcome</h1>
-    <input id="email" class="w-full p-2 mb-2 border" placeholder="Email">
-    <input id="password" type="password" class="w-full p-2 mb-4 border" placeholder="Password">
-
-    <button onclick="login()" class="bg-blue-500 text-white px-4 py-2 mr-2">Login</button>
-    <button onclick="signup()" class="bg-green-500 text-white px-4 py-2">Sign Up</button>
-  </div>
-
-  <!-- PROBLEMS -->
-  <div id="problemScreen" class="hidden">
-    <h2 class="text-2xl font-bold mb-4">What are you struggling with?</h2>
-
-    <label><input type="checkbox" value="focus"> Can't focus</label><br>
-    <label><input type="checkbox" value="procrastination"> Procrastination</label><br>
-    <label><input type="checkbox" value="forgetfulness"> Forget tasks</label>
-
-    <button onclick="saveProblems()" class="mt-4 bg-blue-500 text-white px-4 py-2">
-      Get Techniques
-    </button>
-  </div>
-
-  <!-- TECHNIQUES -->
-  <div id="techniqueScreen" class="hidden">
-    <h2 class="text-2xl font-bold mb-4">Recommended Techniques</h2>
-    <ul id="techniqueList" class="space-y-3"></ul>
-
-    <button onclick="goToProgress()" class="mt-6 bg-purple-500 text-white px-4 py-2">
-      View Progress
-    </button>
-  </div>
-
-  <!-- PROGRESS -->
-  <div id="progressScreen" class="hidden">
-    <h2 class="text-2xl font-bold mb-4">Your Progress</h2>
-
-    <p id="pointsDisplay"></p>
-    <p id="tasksDisplay"></p>
-    <p id="streakDisplay"></p>
-
-    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2">
-      Logout
-    </button>
-  </div>
-
+  <button onclick="login()">Login</button>
+  <button onclick="signup()">Sign Up</button>
 </div>
 
-<script type="module">
+<div id="problemScreen" class="hidden">
+  <h2>What are you struggling with?</h2>
 
-/* 🔥 FIREBASE SETUP */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  <label><input type="checkbox" value="focus"> Can't focus</label><br>
+  <label><input type="checkbox" value="procrastination"> Procrastination</label><br>
+  <label><input type="checkbox" value="forgetfulness"> Forget tasks</label><br>
 
-import {
-  getFirestore, collection, addDoc, getDocs,
-  query, where, updateDoc, doc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <button onclick="saveProblems()">Get Techniques</button>
+</div>
 
-import {
-  getAuth, onAuthStateChanged, signInAnonymously
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+<div id="techniqueScreen" class="hidden">
+  <h2>Recommended Techniques</h2>
+  <ul id="techniqueList"></ul>
 
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-};
+  <button onclick="goToProgress()">View Progress</button>
+</div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+<div id="progressScreen" class="hidden">
+  <h2>Your Progress</h2>
 
-let currentUser = null;
+  <p id="pointsDisplay"></p>
+  <p id="tasksDisplay"></p>
+  <p id="streakDisplay"></p>
 
-/* 🔐 AUTH (anonymous for now) */
-signInAnonymously(auth);
+  <button onclick="logout()">Logout</button>
+</div>
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-    showScreen("problemScreen");
-  }
-});
-
-/* 📅 DATE HELPERS */
-function getToday() {
-  return new Date().toISOString().split("T")[0];
-}
-
-function getYesterday() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().split("T")[0];
-}
-
-/* 🔥 SAVE PROBLEMS */
-async function saveProblemsToFirestore(problems) {
-  try {
-    await addDoc(collection(db, "userProblems"), {
-      uid: currentUser.uid,
-      problems,
-      points: 0,
-      completedTasks: 0,
-      streak: 0,
-      lastCompletedDate: null
-    });
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-/* 🔥 UPDATE STREAK */
-async function updateStreak(docRef, data) {
-  const today = getToday();
-  const yesterday = getYesterday();
-
-  let streak = data.streak || 0;
-
-  if (data.lastCompletedDate === today) return streak;
-
-  if (data.lastCompletedDate === yesterday) {
-    streak += 1;
-  } else {
-    streak = 1;
-  }
-
-  await updateDoc(docRef, {
-    streak,
-    lastCompletedDate: today
-  });
-
-  return streak;
-}
-
-/* 🎯 COMPLETE TASK */
-window.completeTask = async function () {
-  const q = query(
-    collection(db, "userProblems"),
-    where("uid", "==", currentUser.uid)
-  );
-
-  const snapshot = await getDocs(q);
-
-  snapshot.forEach(async (docSnap) => {
-    const data = docSnap.data();
-    const docRef = doc(db, "userProblems", docSnap.id);
-
-    const streak = await updateStreak(docRef, data);
-
-    await updateDoc(docRef, {
-      points: (data.points || 0) + 10,
-      completedTasks: (data.completedTasks || 0) + 1
-    });
-
-    alert(`+10 points 🎉\n🔥 Streak: ${streak}`);
-  });
-};
-
-/* 📊 LOAD PROGRESS */
-async function loadUserData() {
-  const q = query(
-    collection(db, "userProblems"),
-    where("uid", "==", currentUser.uid)
-  );
-
-  const snapshot = await getDocs(q);
-
-  let points = 0;
-  let tasks = 0;
-  let streak = 0;
-
-  snapshot.forEach((doc) => {
-    const d = doc.data();
-    points += d.points || 0;
-    tasks += d.completedTasks || 0;
-    streak = Math.max(streak, d.streak || 0);
-  });
-
-  document.getElementById("pointsDisplay").innerText = "Points: " + points;
-  document.getElementById("tasksDisplay").innerText = "Tasks: " + tasks;
-  document.getElementById("streakDisplay").innerText = "🔥 Streak: " + streak + " days";
-}
-
-/* ---------------- UI LOGIC ---------------- */
-
+<script>
 let userData = { problems: [] };
 
 const solutions = {
@@ -205,21 +58,17 @@ const solutions = {
 };
 
 function showScreen(id) {
-  document.querySelectorAll("div[id$='Screen']")
-    .forEach(d => d.classList.add("hidden"));
+  document.querySelectorAll("div").forEach(d => d.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
-window.saveProblems = async function () {
+function saveProblems() {
   const selected = [...document.querySelectorAll("input:checked")]
     .map(cb => cb.value);
 
   userData.problems = selected;
-
-  await saveProblemsToFirestore(selected);
-
   showTechniques();
-};
+}
 
 function showTechniques() {
   const list = document.getElementById("techniqueList");
@@ -228,13 +77,10 @@ function showTechniques() {
   userData.problems.forEach(p => {
     solutions[p].forEach(t => {
       const li = document.createElement("li");
-      li.className = "bg-white p-3 rounded shadow flex justify-between";
 
       li.innerHTML = `
-        <span>${t}</span>
-        <button onclick="completeTask()" class="bg-green-500 text-white px-2 py-1">
-          Done
-        </button>
+        ${t}
+        <button onclick="completeTask()">Done</button>
       `;
 
       list.appendChild(li);
@@ -244,15 +90,25 @@ function showTechniques() {
   showScreen("techniqueScreen");
 }
 
-window.goToProgress = async function () {
-  await loadUserData();
+let points = 0;
+let tasks = 0;
+
+function completeTask() {
+  points += 10;
+  tasks += 1;
+  alert("+10 points!");
+}
+
+function goToProgress() {
+  document.getElementById("pointsDisplay").innerText = "Points: " + points;
+  document.getElementById("tasksDisplay").innerText = "Tasks: " + tasks;
+  document.getElementById("streakDisplay").innerText = "Streak: (not implemented)";
   showScreen("progressScreen");
-};
+}
 
-window.login = () => {};
-window.signup = () => {};
-window.logout = () => location.reload();
-
+function login() { showScreen("problemScreen"); }
+function signup() { showScreen("problemScreen"); }
+function logout() { location.reload(); }
 </script>
 
 </body>
