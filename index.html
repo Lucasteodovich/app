@@ -2,17 +2,92 @@
 <html>
 <head>
   <title>ADHD Support App</title>
+
   <style>
-    body { font-family: Arial; background: #f0f0f0; padding: 20px; }
-    .box { background: white; padding: 15px; margin: 10px 0; }
-    button { margin-top: 10px; }
-    .hidden { display: none; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #dbeafe, #fce7f3);
+      padding: 20px;
+      color: #333;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .box {
+      background: #ffffffcc;
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      margin: 15px auto;
+      border-radius: 20px;
+      max-width: 400px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+
+    label {
+      display: block;
+      padding: 8px;
+      border-radius: 10px;
+      margin: 5px 0;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    label:hover {
+      background: #e0f2fe;
+    }
+
+    button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 12px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #4f46e5;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
+    small {
+      color: #555;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
 
-<div id="loginScreen">
+<!-- LOGIN -->
+<div id="loginScreen" class="box">
   <h1>Welcome</h1>
   <input id="email" placeholder="Email"><br><br>
   <input id="password" type="password" placeholder="Password"><br><br>
@@ -21,24 +96,28 @@
   <button onclick="signup()">Sign Up</button>
 </div>
 
-<div id="problemScreen" class="hidden">
+<!-- PROBLEMS -->
+<div id="problemScreen" class="box hidden">
   <h2>What are you struggling with?</h2>
 
-  <label><input type="checkbox" value="focus"> Can't focus</label><br>
-  <label><input type="checkbox" value="procrastination"> Procrastination</label><br>
-  <label><input type="checkbox" value="forgetfulness"> Forget tasks</label><br>
+  <label><input type="checkbox" value="focus"> 🎯 Can't focus</label>
+  <label><input type="checkbox" value="procrastination"> ⏳ Procrastination</label>
+  <label><input type="checkbox" value="forgetfulness"> 🧠 Forget tasks</label>
+  <label><input type="checkbox" value="concentration"> 🔍 Poor concentration</label>
 
   <button onclick="saveProblems()">Get Techniques</button>
 </div>
 
-<div id="techniqueScreen" class="hidden">
+<!-- TECHNIQUES -->
+<div id="techniqueScreen" class="box hidden">
   <h2>Recommended Techniques</h2>
   <ul id="techniqueList"></ul>
 
   <button onclick="goToProgress()">View Progress</button>
 </div>
 
-<div id="progressScreen" class="hidden">
+<!-- PROGRESS -->
+<div id="progressScreen" class="box hidden">
   <h2>Your Progress</h2>
 
   <p id="pointsDisplay"></p>
@@ -52,9 +131,53 @@
 let userData = { problems: [] };
 
 const solutions = {
-  focus: ["Pomodoro Technique", "Noise-canceling headphones"],
-  procrastination: ["5-minute rule", "Break tasks small"],
-  forgetfulness: ["Write tasks immediately", "Use reminders"]
+  focus: [
+    {
+      title: "Pomodoro Technique",
+      desc: "Work for 25 minutes, then take a 5-minute break. This helps your brain stay fresh."
+    },
+    {
+      title: "Noise-canceling headphones",
+      desc: "Reduce distractions by blocking external sounds so you can focus better."
+    }
+  ],
+
+  procrastination: [
+    {
+      title: "5-minute rule",
+      desc: "Start the task for just 5 minutes. Starting is the hardest part."
+    },
+    {
+      title: "Break tasks into small steps",
+      desc: "Small steps feel easier and reduce overwhelm."
+    }
+  ],
+
+  forgetfulness: [
+    {
+      title: "Write tasks immediately",
+      desc: "Capture tasks right away so you don’t forget."
+    },
+    {
+      title: "Use reminders",
+      desc: "Set alarms so you don’t rely only on memory."
+    }
+  ],
+
+  concentration: [
+    {
+      title: "Single-tasking",
+      desc: "Focus on one task at a time instead of multitasking."
+    },
+    {
+      title: "Environment control",
+      desc: "Remove distractions like your phone or clutter."
+    },
+    {
+      title: "Deep work blocks",
+      desc: "Work in longer focused sessions (45–60 minutes)."
+    }
+  ]
 };
 
 function showScreen(id) {
@@ -79,8 +202,9 @@ function showTechniques() {
       const li = document.createElement("li");
 
       li.innerHTML = `
-        ${t}
-        <button onclick="completeTask()">Done</button>
+        <strong>${t.title}</strong><br>
+        <small>${t.desc}</small><br>
+        <button onclick="completeTask(this)">✨ Done</button>
       `;
 
       list.appendChild(li);
@@ -93,16 +217,20 @@ function showTechniques() {
 let points = 0;
 let tasks = 0;
 
-function completeTask() {
+function completeTask(btn) {
   points += 10;
   tasks += 1;
-  alert("+10 points!");
+
+  btn.innerText = "✅ Completed";
+  btn.disabled = true;
+  btn.parentElement.style.background = "#dcfce7";
 }
 
 function goToProgress() {
-  document.getElementById("pointsDisplay").innerText = "Points: " + points;
-  document.getElementById("tasksDisplay").innerText = "Tasks: " + tasks;
-  document.getElementById("streakDisplay").innerText = "Streak: (not implemented)";
+  document.getElementById("pointsDisplay").innerText = "⭐ Points: " + points;
+  document.getElementById("tasksDisplay").innerText = "✅ Tasks completed: " + tasks;
+  document.getElementById("streakDisplay").innerText = "🔥 Streak: Coming soon";
+
   showScreen("progressScreen");
 }
 
