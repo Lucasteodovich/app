@@ -193,12 +193,6 @@ function saveProblems() {
   showTechniques();
 }
 
-function showScreen(id) {
-  // Fix to prevent target screen from accidentally hiding itself
-  document.querySelectorAll(".box").forEach(d => d.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-}
-
 function showTechniques() {
   const list = document.getElementById("techniqueList");
   list.innerHTML = "";
@@ -223,7 +217,6 @@ function showTechniques() {
 let points = 0;
 let tasks = 0;
 
-// --- STREAK LOGIC STARTS HERE ---
 function completeTask(btn) {
   points += 10;
   tasks += 1;
@@ -231,69 +224,15 @@ function completeTask(btn) {
   btn.innerText = "✅ Completed";
   btn.disabled = true;
   btn.parentElement.style.background = "#dcfce7";
-
-  updateStreak();
-}
-
-function updateStreak() {
-  const today = new Date().toDateString();
-  const lastCompletedDate = localStorage.getItem("lastCompletedDate");
-  let currentStreak = parseInt(localStorage.getItem("currentStreak")) || 0;
-
-  if (!lastCompletedDate) {
-    // First task ever completed
-    currentStreak = 1;
-  } else {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayString = yesterday.toDateString();
-
-    if (lastCompletedDate === yesterdayString) {
-      // Last completed task was yesterday, increment streak
-      currentStreak += 1;
-    } else if (lastCompletedDate === today) {
-      // Already completed a task today, keep streak the same
-    } else {
-      // Missed a day or more, reset streak to 1
-      currentStreak = 1;
-    }
-  }
-
-  // Save changes back to localStorage
-  localStorage.setItem("lastCompletedDate", today);
-  localStorage.setItem("currentStreak", currentStreak);
-}
-
-function checkStreakValidity() {
-  const lastCompletedDate = localStorage.getItem("lastCompletedDate");
-  let currentStreak = parseInt(localStorage.getItem("currentStreak")) || 0;
-
-  if (lastCompletedDate) {
-    const today = new Date().toDateString();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayString = yesterday.toDateString();
-
-    // If the last completion wasn't today OR yesterday, the streak is broken (reset to 0)
-    if (lastCompletedDate !== today && lastCompletedDate !== yesterdayString) {
-      currentStreak = 0;
-      localStorage.setItem("currentStreak", currentStreak);
-    }
-  }
-  return currentStreak;
 }
 
 function goToProgress() {
-  // Check if the user broke their streak before rendering the text
-  const currentStreak = checkStreakValidity();
-
   document.getElementById("pointsDisplay").innerText = "⭐ Points: " + points;
   document.getElementById("tasksDisplay").innerText = "✅ Tasks completed: " + tasks;
-  document.getElementById("streakDisplay").innerText = "🔥 Streak: " + currentStreak + " days";
+  document.getElementById("streakDisplay").innerText = "🔥 Streak: Coming soon";
 
   showScreen("progressScreen");
 }
-// --- STREAK LOGIC ENDS HERE ---
 
 function login() { showScreen("problemScreen"); }
 function signup() { showScreen("problemScreen"); }
@@ -301,4 +240,4 @@ function logout() { location.reload(); }
 </script>
 
 </body>
-</html>
+</html> 
