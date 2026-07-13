@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Image</title>
+</head>
+<body>
+
+    <h2>My Robot</h2>
+
+    <img id="robotImage" alt="Robot will appear here" width="300">
+
+    <script src="script.js"></script>
+</body>
+</html>
+async function loadRobot() {
+    try {
+        // Fetch the image
+        const response = await fetch("https://robohash.org");
+
+        // Check if the request succeeded
+        if (!response.ok) {
+            throw new Error("Failed to fetch robot image");
+        }
+
+        // Convert the response into a Blob (image data)
+        const imageBlob = await response.blob();
+
+        // Create a temporary URL for the image
+        const imageUrl = URL.createObjectURL(imageBlob);
+
+        // Display the image
+        document.getElementById("robotImage").src = imageUrl;
+
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+// Load the robot when the page opens
+loadRobot();
