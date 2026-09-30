@@ -3,756 +3,287 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WordQuest - Dyslexia Learning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FastLearning</title>
 
 <style>
-:root {
-  --green: #58cc02;
-  --dark-green: #46a302;
-  --blue: #1cb0f6;
-  --purple: #8b5cf6;
-  --yellow: #ffc800;
-  --bg: #f0f8ff;
-  --text: #243047;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 body {
+  font-family: Arial, sans-serif;
+  background: #f4f8f5;
+  text-align: center;
   margin: 0;
-  font-family: "Arial", "Verdana", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
+  color: #263238;
 }
-
-button {
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  border: none;
-  border-radius: 14px;
-  padding: 13px 20px;
-  transition: 0.15s;
-}
-
-button:focus-visible {
-  outline: 3px solid var(--purple);
-  outline-offset: 3px;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 header {
-  background: white;
-  border-bottom: 2px solid #e5eaf2;
-  padding: 14px 5%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.logo {
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--green);
-}
-
-.stats {
-  display: flex;
-  gap: 18px;
+  background: #58cc02;
+  color: white;
+  padding: 18px;
+  font-size: 25px;
   font-weight: bold;
 }
-
 main {
-  max-width: 900px;
-  margin: 30px auto;
+  max-width: 500px;
+  margin: 25px auto;
   padding: 15px;
 }
-
-.screen {
-  display: none;
-}
-
-.screen.active {
-  display: block;
-}
-
 .card {
   background: white;
-  border: 2px solid #e5eaf2;
-  border-radius: 22px;
-  padding: 28px;
-  margin-bottom: 22px;
-  box-shadow: 0 5px 0 #e0e7ef;
-}
-
-.hero {
-  text-align: center;
-  padding: 35px 20px;
-}
-
-.mascot {
-  font-size: 85px;
-  margin: 10px;
-}
-
-h1 {
-  font-size: 34px;
-  line-height: 1.2;
-}
-
-h2 {
-  font-size: 24px;
-}
-
-p {
-  font-size: 17px;
-}
-
-.primary {
-  background: var(--green);
-  color: white;
-  box-shadow: 0 5px var(--dark-green);
-}
-
-.primary:hover {
-  background: var(--dark-green);
-}
-
-.secondary {
-  background: white;
-  color: var(--blue);
-  border: 2px solid #d7e2eb;
-  box-shadow: 0 4px #d7e2eb;
-}
-
-.secondary:hover {
-  background: #effaff;
-}
-
-.purple {
-  background: var(--purple);
-  color: white;
-  box-shadow: 0 5px #7043d3;
-}
-
-.full {
-  width: 100%;
-  margin-top: 12px;
-}
-
-.lesson-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 18px;
-}
-
-.lesson {
-  text-align: center;
-  border: 2px solid #e5eaf2;
-  border-radius: 20px;
   padding: 22px;
-  background: white;
-  box-shadow: 0 5px #e0e7ef;
-}
-
-.lesson-icon {
-  font-size: 48px;
-}
-
-.lesson h3 {
-  margin-bottom: 5px;
-}
-
-.lesson p {
-  font-size: 15px;
-  color: #596579;
-}
-
-.bar {
-  background: #e5eaf2;
-  height: 16px;
-  border-radius: 20px;
-  overflow: hidden;
   margin: 15px 0;
-}
-
-.bar-fill {
-  background: var(--green);
-  height: 100%;
-  width: 0%;
-  transition: width 0.4s;
-}
-
-.question {
-  text-align: center;
-  margin: 25px 0;
-}
-
-.word {
-  background: #f0f8ff;
-  border: 2px dashed #a5b4c7;
   border-radius: 18px;
-  font-size: 34px;
+  box-shadow: 0 3px 10px #ddd;
+}
+button, input {
+  width: 90%;
+  padding: 13px;
+  margin: 7px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+button {
+  background: #58cc02;
+  color: white;
+  border: none;
   font-weight: bold;
-  letter-spacing: 2px;
-  padding: 25px;
-  margin: 20px 0;
+  cursor: pointer;
 }
-
-.answers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+button:hover { background: #46a302; }
+.option {
+  background: #eaf5e8;
+  color: #263238;
 }
-
-.answer {
-  background: white;
-  border: 2px solid #dbe3ed;
-  box-shadow: 0 4px #dbe3ed;
-  color: var(--text);
-}
-
-.answer:hover {
-  background: #effaff;
-}
-
-.answer.correct {
-  background: #dcfce7;
-  border-color: var(--green);
-}
-
-.answer.wrong {
-  background: #fee2e2;
-  border-color: #ef4444;
-}
-
-.feedback {
-  text-align: center;
-  font-weight: bold;
-  font-size: 18px;
-  min-height: 35px;
-  margin-top: 18px;
-}
-
-.feedback.good {
-  color: #269b00;
-}
-
-.feedback.bad {
-  color: #dc2626;
-}
-
-.nav {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 25px 0;
-}
-
-.nav button {
-  background: white;
-  color: var(--text);
-  border: 2px solid #e5eaf2;
-}
-
-.small {
-  font-size: 14px;
-  color: #64748b;
-}
-
-footer {
-  text-align: center;
-  color: #64748b;
-  padding: 30px 15px;
-}
-
-@media (max-width: 550px) {
-  h1 {
-    font-size: 28px;
-  }
-
-  .stats {
-    gap: 10px;
-    font-size: 14px;
-  }
-
-  .card {
-    padding: 20px;
-  }
-
-  .answers {
-    grid-template-columns: 1fr;
-  }
-}
+.hidden { display: none; }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo">🐸 WordQuest</div>
-  <div class="stats">
-    <span>🔥 <span id="streak">0</span></span>
-    <span>❤️ <span id="hearts">5</span></span>
-    <span>⭐ <span id="xp">0</span> XP</span>
-  </div>
-</header>
+<header>🐸 FastLearning</header>
 
 <main>
 
+<!-- LOGIN / SIGN UP -->
+<section id="welcome" class="card">
+  <h1>Welcome to FastLearning!</h1>
+  <p>Learn to read through fun games and activities.</p>
+  <h2>📚 Make learning fun!</h2>
+
+  <button onclick="show('login')">Log In</button>
+  <button onclick="show('signup')">Sign Up</button>
+</section>
+
+<!-- LOG IN -->
+<section id="login" class="card hidden">
+  <h2>Log In</h2>
+  <input id="loginEmail" type="email"
+         placeholder="Email">
+  <input id="loginPass" type="password"
+         placeholder="Password">
+  <button onclick="enter()">Log In</button>
+  <button class="option" onclick="show('welcome')">
+    Back
+  </button>
+  <p id="loginMsg"></p>
+</section>
+
+<!-- SIGN UP -->
+<section id="signup" class="card hidden">
+  <h2>Create an Account</h2>
+  <input id="newName" placeholder="Your name">
+  <input id="newEmail" type="email"
+         placeholder="Email">
+  <input id="newPass" type="password"
+         placeholder="Create password">
+  <button onclick="register()">Sign Up</button>
+  <button class="option" onclick="show('welcome')">
+    Back
+  </button>
+  <p id="signupMsg"></p>
+</section>
+
 <!-- HOME -->
-<section id="home" class="screen active">
-  <div class="card hero">
-    <div class="mascot">🐸</div>
-    <h1>Welcome to WordQuest!</h1>
-    <p>
-      Make reading fun, one little step at a time.
-      Practice words, learn new strategies, and earn rewards!
-    </p>
-    <button class="primary" onclick="showScreen('lessons')">
-      Start Learning
-    </button>
+<section id="home" class="hidden">
+  <div class="card">
+    <h2>Hi, <span id="player">Learner</span>! 👋</h2>
+    <p>⭐ XP: <span id="xp">0</span></p>
+    <p>❤️ Hearts: <span id="hearts">5</span></p>
+    <p>Choose a lesson to begin!</p>
   </div>
 
   <div class="card">
-    <h2>📚 Your learning journey</h2>
-    <p>Complete short activities and collect XP.</p>
-    <div class="bar">
-      <div class="bar-fill" id="homeBar"></div>
-    </div>
-    <p id="homeProgress" class="small">0 of 3 lessons completed</p>
+    <h3>📖 Word Explorer</h3>
+    <p>Recognise words and pictures.</p>
+    <button onclick="start(0)">Start Lesson</button>
   </div>
 
   <div class="card">
-    <h2>💡 Today's tip</h2>
-    <p>
-      Take your time! Try reading a word in smaller parts.
-      You can learn at your own pace.
-    </p>
+    <h3>🔤 Word Builder</h3>
+    <p>Practise spelling and word building.</p>
+    <button onclick="start(1)">Start Lesson</button>
   </div>
+
+  <div class="card">
+    <h3>📚 Reading Adventure</h3>
+    <p>Practise reading and comprehension.</p>
+    <button onclick="start(2)">Start Lesson</button>
+  </div>
+
+  <button class="option" onclick="logout()">Log Out</button>
 </section>
 
-<!-- LESSON MENU -->
-<section id="lessons" class="screen">
-  <div class="card">
-    <h1>🗺️ Learning Path</h1>
-    <p>Choose a lesson and start your adventure!</p>
-  </div>
-
-  <div class="lesson-grid">
-
-    <div class="lesson">
-      <div class="lesson-icon">🔤</div>
-      <h3>Lesson 1</h3>
-      <h2>Word Explorer</h2>
-      <p>Recognize words and connect them with pictures.</p>
-      <button class="primary full" onclick="startLesson(0)">
-        Start Lesson
-      </button>
-      <p id="status0" class="small">Not completed</p>
-    </div>
-
-    <div class="lesson">
-      <div class="lesson-icon">🧩</div>
-      <h3>Lesson 2</h3>
-      <h2>Word Builder</h2>
-      <p>Break words into smaller parts and syllables.</p>
-      <button class="primary full" onclick="startLesson(1)">
-        Start Lesson
-      </button>
-      <p id="status1" class="small">Not completed</p>
-    </div>
-
-    <div class="lesson">
-      <div class="lesson-icon">📖</div>
-      <h3>Lesson 3</h3>
-      <h2>Reading Adventure</h2>
-      <p>Practice reading short sentences and understanding them.</p>
-      <button class="primary full" onclick="startLesson(2)">
-        Start Lesson
-      </button>
-      <p id="status2" class="small">Not completed</p>
-    </div>
-
-  </div>
-
-  <div class="nav">
-    <button onclick="showScreen('home')">🏠 Home</button>
-    <button onclick="showScreen('progress')">🏆 Progress</button>
-  </div>
-</section>
-
-<!-- ACTIVITY -->
-<section id="activity" class="screen">
-  <div class="card">
-    <button class="secondary" onclick="showScreen('lessons')">
-      ← Back
-    </button>
-
-    <h2 id="lessonTitle">Lesson</h2>
-
-    <div class="bar">
-      <div class="bar-fill" id="lessonBar"></div>
-    </div>
-
-    <p id="questionNumber" class="small"></p>
-
-    <div class="question">
-      <h2 id="questionText">Choose the correct answer</h2>
-      <div class="word" id="questionWord">🐱</div>
-      <div class="answers" id="answers"></div>
-      <div class="feedback" id="feedback" aria-live="polite"></div>
-    </div>
-
-    <button id="nextBtn" class="primary full" onclick="nextQuestion()" disabled>
-      Check Answer
-    </button>
-  </div>
-</section>
-
-<!-- REWARD -->
-<section id="reward" class="screen">
-  <div class="card hero">
-    <div class="mascot">🎉</div>
-    <h1>Fantastic job!</h1>
-    <p id="rewardMessage">You completed your lesson!</p>
-    <h2 id="rewardXP">+30 XP ⭐</h2>
-    <button class="primary full" onclick="showScreen('lessons')">
-      Continue Learning
-    </button>
-    <button class="secondary full" onclick="showScreen('progress')">
-      View My Progress
-    </button>
-  </div>
-</section>
-
-<!-- PROGRESS -->
-<section id="progress" class="screen">
-  <div class="card hero">
-    <div class="mascot">🏆</div>
-    <h1>Your Achievements</h1>
-    <h2>⭐ <span id="totalXP">0</span> XP</h2>
-    <p id="completedCount">Lessons completed: 0 / 3</p>
-
-    <div class="bar">
-      <div class="bar-fill" id="progressBar"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>🎖️ Badges</h2>
-    <p id="badge1">🔒 Word Explorer: Complete Lesson 1</p>
-    <p id="badge2">🔒 Word Builder: Complete Lesson 2</p>
-    <p id="badge3">🔒 Reading Star: Complete Lesson 3</p>
-  </div>
-
-  <div class="card">
-    <h2>🌱 Keep learning!</h2>
-    <p>
-      Every small step counts. You can repeat lessons
-      to keep practicing.
-    </p>
-    <button class="primary full" onclick="showScreen('lessons')">
-      Back to Lessons
-    </button>
-  </div>
-
-  <div class="nav">
-    <button onclick="showScreen('home')">🏠 Home</button>
-  </div>
+<!-- LESSON -->
+<section id="lesson" class="card hidden">
+  <h2 id="lessonTitle">Lesson</h2>
+  <p id="question"></p>
+  <div id="answers"></div>
+  <p id="feedback"></p>
+  <button id="next" class="hidden" onclick="nextQ()">
+    Continue
+  </button>
+  <button class="option" onclick="show('home')">
+    Exit Lesson
+  </button>
 </section>
 
 </main>
 
-<footer>
-  WordQuest | A student learning project
-  <br>
-  <span class="small">
-    Educational practice tool. Not a diagnostic or treatment tool.
-  </span>
-</footer>
-
 <script>
+let xp = 0, hearts = 5, current = 0, questionIndex = 0;
+
 const lessons = [
   {
     title: "Word Explorer",
     questions: [
-      {
-        prompt: "Which word matches the picture?",
-        word: "🐱",
-        options: ["Cat", "Dog", "Sun", "Book"],
-        answer: "Cat",
-        explanation: "Correct! Cat is the word for this animal."
-      },
-      {
-        prompt: "Choose the word that says SUN.",
-        word: "☀️",
-        options: ["Run", "Sun", "Fun", "Cup"],
-        answer: "Sun",
-        explanation: "Great! S-U-N spells sun."
-      },
-      {
-        prompt: "Which word begins with B?",
-        word: "📚",
-        options: ["Apple", "Book", "Cat", "Dog"],
-        answer: "Book",
-        explanation: "Book starts with the letter B."
-      }
+      ["Which word is a fruit?", ["Apple","Chair","Book"], 0],
+      ["Which word is an animal?", ["Table","Tiger","Pencil"], 1],
+      ["Which word means happy?", ["Joyful","Sad","Angry"], 0]
     ]
   },
-
   {
     title: "Word Builder",
     questions: [
-      {
-        prompt: "Which parts make the word SUNSET?",
-        word: "🌅",
-        options: ["SUN + SET", "S + NET", "SUN + SIT", "SON + SET"],
-        answer: "SUN + SET",
-        explanation: "Sunset can be divided into SUN and SET."
-      },
-      {
-        prompt: "Which word has two syllables?",
-        word: "🐰",
-        options: ["Cat", "Rabbit", "Dog", "Sun"],
-        answer: "Rabbit",
-        explanation: "Rabbit has two syllables: rab-bit."
-      },
-      {
-        prompt: "Complete the word: RAIN + ____",
-        word: "🌈",
-        options: ["BOW", "CAT", "DOG", "SUN"],
-        answer: "BOW",
-        explanation: "RAIN + BOW makes the word rainbow."
-      }
+      ["Which syllables form 'sunset'?", ["Sun + set","Su + net","S + unset"], 0],
+      ["Complete the word: Ba__na", ["nana","mama","tata"], 0],
+      ["Which word has two syllables?", ["Cat","Rabbit","Sun"], 1]
     ]
   },
-
   {
     title: "Reading Adventure",
     questions: [
-      {
-        prompt: "Read the sentence. What does the cat do?",
-        word: "The cat sits on the mat.",
-        options: ["Sits", "Runs", "Jumps", "Sleeps"],
-        answer: "Sits",
-        explanation: "The sentence says that the cat sits on the mat."
-      },
-      {
-        prompt: "What is the opposite of HOT?",
-        word: "The ice is cold.",
-        options: ["Warm", "Cold", "Big", "Fast"],
-        answer: "Cold",
-        explanation: "Cold is the opposite of hot."
-      },
-      {
-        prompt: "Read: The dog is big. What is the dog like?",
-        word: "🐕",
-        options: ["Small", "Big", "Cold", "Fast"],
-        answer: "Big",
-        explanation: "You found the information in the sentence!"
-      }
+      ["Tom has a red ball. What colour is the ball?",
+       ["Blue","Red","Green"], 1],
+      ["Sara reads a book. What does Sara read?",
+       ["A book","A ball","A car"], 0],
+      ["The dog runs fast. Who runs?",
+       ["The cat","The dog","The boy"], 1]
     ]
   }
 ];
 
-let currentLesson = 0;
-let currentQuestion = 0;
-let selectedAnswer = null;
-let correctAnswers = 0;
-let xp = 0;
-let hearts = 5;
-let streak = 0;
-let completed = [false, false, false];
-
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(screen => {
-    screen.classList.remove("active");
-  });
-
-  document.getElementById(id).classList.add("active");
-  window.scrollTo(0, 0);
+function show(id) {
+  ["welcome","login","signup","home","lesson"]
+    .forEach(s => document.getElementById(s)
+      .classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 }
 
-function startLesson(index) {
-  currentLesson = index;
-  currentQuestion = 0;
-  correctAnswers = 0;
-  selectedAnswer = null;
+function enter() {
+  let email = document.getElementById("loginEmail").value;
+  let pass = document.getElementById("loginPass").value;
 
-  document.getElementById("lessonTitle").innerText =
-    lessons[index].title;
+  if (!email || !pass) {
+    document.getElementById("loginMsg").textContent =
+      "Please enter your email and password.";
+    return;
+  }
 
-  showScreen("activity");
-  renderQuestion();
+  document.getElementById("player").textContent =
+    email.split("@")[0];
+  show("home");
 }
 
-function renderQuestion() {
-  const q = lessons[currentLesson].questions[currentQuestion];
+function register() {
+  let name = document.getElementById("newName").value;
+  let email = document.getElementById("newEmail").value;
+  let pass = document.getElementById("newPass").value;
 
-  selectedAnswer = null;
+  if (!name || !email || !pass) {
+    document.getElementById("signupMsg").textContent =
+      "Please complete all fields.";
+    return;
+  }
 
-  document.getElementById("questionText").innerText = q.prompt;
-  document.getElementById("questionWord").innerText = q.word;
+  document.getElementById("player").textContent = name;
+  show("home");
+}
 
-  document.getElementById("questionNumber").innerText =
-    "Question " + (currentQuestion + 1) +
-    " of " + lessons[currentLesson].questions.length;
+function logout() {
+  show("welcome");
+}
 
-  document.getElementById("lessonBar").style.width =
-    (currentQuestion / lessons[currentLesson].questions.length * 100) + "%";
+function start(index) {
+  current = index;
+  questionIndex = 0;
+  show("lesson");
+  document.getElementById("lessonTitle").textContent =
+    lessons[current].title;
+  loadQuestion();
+}
 
-  document.getElementById("feedback").innerText = "";
-  document.getElementById("feedback").className = "feedback";
+function loadQuestion() {
+  let q = lessons[current].questions[questionIndex];
+  document.getElementById("question").textContent = q[0];
+  document.getElementById("feedback").textContent = "";
+  document.getElementById("next").classList.add("hidden");
 
-  const nextBtn = document.getElementById("nextBtn");
-  nextBtn.disabled = true;
-  nextBtn.innerText = "Choose an answer";
+  let area = document.getElementById("answers");
+  area.innerHTML = "";
 
-  const answers = document.getElementById("answers");
-  answers.innerHTML = "";
-
-  q.options.forEach(option => {
-    const btn = document.createElement("button");
-    btn.className = "answer";
-    btn.innerText = option;
-
-    btn.onclick = () => selectAnswer(option, btn);
-
-    answers.appendChild(btn);
+  q[1].forEach((answer, i) => {
+    let b = document.createElement("button");
+    b.textContent = answer;
+    b.className = "option";
+    b.onclick = () => check(i);
+    area.appendChild(b);
   });
 }
 
-function selectAnswer(option, btn) {
-  if (selectedAnswer !== null) return;
+function check(choice) {
+  let q = lessons[current].questions[questionIndex];
+  let feedback = document.getElementById("feedback");
 
-  selectedAnswer = option;
-
-  const q = lessons[currentLesson].questions[currentQuestion];
-  const feedback = document.getElementById("feedback");
-  const nextBtn = document.getElementById("nextBtn");
-
-  document.querySelectorAll(".answer").forEach(b => {
-    b.disabled = true;
-  });
-
-  if (option === q.answer) {
-    correctAnswers++;
+  if (choice === q[2]) {
+    feedback.textContent = "Correct! 🎉 +10 XP";
     xp += 10;
-    streak++;
-
-    btn.classList.add("correct");
-    feedback.innerText = "⭐ " + q.explanation;
-    feedback.className = "feedback good";
-
-    nextBtn.innerText =
-      currentQuestion === lessons[currentLesson].questions.length - 1
-      ? "Finish Lesson"
-      : "Continue";
   } else {
+    feedback.textContent = "Not quite! Try the next question.";
     hearts = Math.max(0, hearts - 1);
-    streak = 0;
-
-    btn.classList.add("wrong");
-
-    feedback.innerText =
-      "Almost! The correct answer is " + q.answer +
-      ". " + q.explanation;
-
-    feedback.className = "feedback bad";
-
-    document.querySelectorAll(".answer").forEach(b => {
-      if (b.innerText === q.answer) {
-        b.classList.add("correct");
-      }
-    });
-
-    nextBtn.innerText = "Next Question";
   }
 
-  nextBtn.disabled = false;
-  updateStats();
+  document.getElementById("xp").textContent = xp;
+  document.getElementById("hearts").textContent = hearts;
+
+  document.querySelectorAll("#answers button")
+    .forEach(b => b.disabled = true);
+
+  document.getElementById("next").classList.remove("hidden");
 }
 
-function nextQuestion() {
-  if (selectedAnswer === null) return;
+function nextQ() {
+  questionIndex++;
 
-  currentQuestion++;
-
-  if (currentQuestion >= lessons[currentLesson].questions.length) {
-    finishLesson();
+  if (questionIndex >= lessons[current].questions.length) {
+    document.getElementById("question").textContent =
+      "Lesson completed! Great job! 🏆";
+    document.getElementById("answers").innerHTML = "";
+    document.getElementById("feedback").textContent =
+      "You earned " + xp + " XP in total!";
+    document.getElementById("next").classList.add("hidden");
   } else {
-    renderQuestion();
+    loadQuestion();
   }
 }
-
-function finishLesson() {
-  const alreadyCompleted = completed[currentLesson];
-
-  completed[currentLesson] = true;
-
-  if (!alreadyCompleted) {
-    xp += 20;
-  }
-
-  document.getElementById("rewardMessage").innerText =
-    "You answered " + correctAnswers + " out of " +
-    lessons[currentLesson].questions.length +
-    " questions correctly!";
-
-  document.getElementById("rewardXP").innerText =
-    alreadyCompleted ? "Great practice! ⭐" : "+20 Bonus XP ⭐";
-
-  updateStats();
-  showScreen("reward");
-}
-
-function updateStats() {
-  document.getElementById("xp").innerText = xp;
-  document.getElementById("hearts").innerText = hearts;
-  document.getElementById("streak").innerText = streak;
-
-  const count = completed.filter(Boolean).length;
-  const percent = count / completed.length * 100;
-
-  document.getElementById("homeBar").style.width = percent + "%";
-  document.getElementById("progressBar").style.width = percent + "%";
-
-  document.getElementById("homeProgress").innerText =
-    count + " of 3 lessons completed";
-
-  document.getElementById("totalXP").innerText = xp;
-  document.getElementById("completedCount").innerText =
-    "Lessons completed: " + count + " / 3";
-
-  completed.forEach((done, i) => {
-    document.getElementById("status" + i).innerText =
-      done ? "✅ Completed!" : "Not completed";
-
-    document.getElementById("badge" + (i + 1)).innerText =
-      done
-      ? "🏅 " + lessons[i].title + " unlocked!"
-      : "🔒 " + lessons[i].title + ": Complete lesson";
-  });
-}
-
-// Initial display
-updateStats();
 </script>
 
 </body>
