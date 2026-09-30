@@ -14,6 +14,7 @@ body {
   margin: 0;
   color: #263238;
 }
+
 header {
   background: #58cc02;
   color: white;
@@ -21,11 +22,13 @@ header {
   font-size: 25px;
   font-weight: bold;
 }
+
 main {
   max-width: 500px;
   margin: 25px auto;
   padding: 15px;
 }
+
 .card {
   background: white;
   padding: 22px;
@@ -33,6 +36,7 @@ main {
   border-radius: 18px;
   box-shadow: 0 3px 10px #ddd;
 }
+
 button, input {
   width: 90%;
   padding: 13px;
@@ -40,7 +44,9 @@ button, input {
   border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 16px;
+  box-sizing: border-box;
 }
+
 button {
   background: #58cc02;
   color: white;
@@ -48,12 +54,39 @@ button {
   font-weight: bold;
   cursor: pointer;
 }
-button:hover { background: #46a302; }
+
+button:hover {
+  background: #46a302;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .option {
   background: #eaf5e8;
   color: #263238;
 }
-.hidden { display: none; }
+
+.hidden {
+  display: none !important;
+}
+
+#progress {
+  background: #ddd;
+  border-radius: 20px;
+  height: 12px;
+  margin: 15px 0;
+  overflow: hidden;
+}
+
+#bar {
+  background: #58cc02;
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s;
+}
 </style>
 </head>
 
@@ -63,7 +96,7 @@ button:hover { background: #46a302; }
 
 <main>
 
-<!-- LOGIN / SIGN UP -->
+<!-- WELCOME -->
 <section id="welcome" class="card">
   <h1>Welcome to FastLearning!</h1>
   <p>Learn to read through fun games and activities.</p>
@@ -76,34 +109,33 @@ button:hover { background: #46a302; }
 <!-- LOG IN -->
 <section id="login" class="card hidden">
   <h2>Log In</h2>
-  <input id="loginEmail" type="email"
-         placeholder="Email">
-  <input id="loginPass" type="password"
-         placeholder="Password">
+
+  <input id="loginEmail" type="email" placeholder="Email">
+  <input id="loginPass" type="password" placeholder="Password">
+
   <button onclick="enter()">Log In</button>
-  <button class="option" onclick="show('welcome')">
-    Back
-  </button>
+  <button class="option" onclick="show('welcome')">Back</button>
+
   <p id="loginMsg"></p>
 </section>
 
 <!-- SIGN UP -->
 <section id="signup" class="card hidden">
   <h2>Create an Account</h2>
+
   <input id="newName" placeholder="Your name">
-  <input id="newEmail" type="email"
-         placeholder="Email">
-  <input id="newPass" type="password"
-         placeholder="Create password">
+  <input id="newEmail" type="email" placeholder="Email">
+  <input id="newPass" type="password" placeholder="Create password">
+
   <button onclick="register()">Sign Up</button>
-  <button class="option" onclick="show('welcome')">
-    Back
-  </button>
+  <button class="option" onclick="show('welcome')">Back</button>
+
   <p id="signupMsg"></p>
 </section>
 
 <!-- HOME -->
 <section id="home" class="hidden">
+
   <div class="card">
     <h2>Hi, <span id="player">Learner</span>! 👋</h2>
     <p>⭐ XP: <span id="xp">0</span></p>
@@ -135,13 +167,22 @@ button:hover { background: #46a302; }
 <!-- LESSON -->
 <section id="lesson" class="card hidden">
   <h2 id="lessonTitle">Lesson</h2>
+
+  <p id="counter">Question 1 of 5</p>
+
+  <div id="progress">
+    <div id="bar"></div>
+  </div>
+
   <p id="question"></p>
   <div id="answers"></div>
   <p id="feedback"></p>
+
   <button id="next" class="hidden" onclick="nextQ()">
     Continue
   </button>
-  <button class="option" onclick="show('home')">
+
+  <button id="exit" class="option" onclick="show('home')">
     Exit Lesson
   </button>
 </section>
@@ -149,7 +190,13 @@ button:hover { background: #46a302; }
 </main>
 
 <script>
-let xp = 0, hearts = 5, current = 0, questionIndex = 0;
+let xp = 0;
+let hearts = 5;
+let current = 0;
+let questionIndex = 0;
+let currentQuestions = [];
+
+// QUESTION BANKS
 
 const lessons = [
   {
@@ -157,39 +204,64 @@ const lessons = [
     questions: [
       ["Which word is a fruit?", ["Apple","Chair","Book"], 0],
       ["Which word is an animal?", ["Table","Tiger","Pencil"], 1],
-      ["Which word means happy?", ["Joyful","Sad","Angry"], 0]
+      ["Which word means happy?", ["Joyful","Sad","Angry"], 0],
+      ["Which word is a colour?", ["Purple","Window","Bread"], 0],
+      ["Which word is a body part?", ["Elbow","Cloud","Bottle"], 0],
+      ["Which word is a school object?", ["Pencil","Banana","Tiger"], 0],
+      ["Which word is a vehicle?", ["Bicycle","Giraffe","Flower"], 0],
+      ["Which word means the opposite of hot?", ["Cold","Warm","Sunny"], 0],
+      ["Which word is an emotion?", ["Excited","Table","Spoon"], 0],
+      ["Which word is a place?", ["Library","Apple","Rabbit"], 0]
     ]
   },
+
   {
     title: "Word Builder",
     questions: [
       ["Which syllables form 'sunset'?", ["Sun + set","Su + net","S + unset"], 0],
       ["Complete the word: Ba__na", ["nana","mama","tata"], 0],
-      ["Which word has two syllables?", ["Cat","Rabbit","Sun"], 1]
+      ["Which word has two syllables?", ["Cat","Rabbit","Sun"], 1],
+      ["Complete the word: Ap__e", ["pl","bl","tr"], 0],
+      ["Which syllables form 'basket'?", ["Bas + ket","Ba + sket","B + asket"], 0],
+      ["Complete the word: Pi__za", ["z","zz","ss"], 1],
+      ["Which word has three syllables?", ["Elephant","Cat","Dog"], 0],
+      ["Which letters complete 'ch__r'?", ["ai","oa","ee"], 0],
+      ["Which syllables form 'rainbow'?", ["Rain + bow","Ra + inbow","R + ainbow"], 0],
+      ["Complete the word: Mon__y", ["ke","ca","ti"], 0]
     ]
   },
+
   {
     title: "Reading Adventure",
     questions: [
-      ["Tom has a red ball. What colour is the ball?",
-       ["Blue","Red","Green"], 1],
-      ["Sara reads a book. What does Sara read?",
-       ["A book","A ball","A car"], 0],
-      ["The dog runs fast. Who runs?",
-       ["The cat","The dog","The boy"], 1]
+      ["Tom has a red ball. What colour is the ball?", ["Blue","Red","Green"], 1],
+      ["Sara reads a book. What does Sara read?", ["A book","A ball","A car"], 0],
+      ["The dog runs fast. Who runs?", ["The cat","The dog","The boy"], 1],
+      ["It is raining. What should Mia use?", ["An umbrella","Sunglasses","A fan"], 0],
+      ["Leo eats breakfast in the morning. When does he eat?", ["Morning","Night","Afternoon"], 0],
+      ["The bird flies in the sky. Where is the bird?", ["In the sky","Under the sea","In a car"], 0],
+      ["Ana has three apples. How many apples does she have?", ["Two","Three","Five"], 1],
+      ["The cat sleeps on the sofa. Where does it sleep?", ["On the sofa","In the garden","On a tree"], 0],
+      ["Ben wears a coat because it is cold. Why does he wear it?", ["Because it is cold","Because it is hot","Because it is sunny"], 0],
+      ["The children play in the park. Where are they?", ["At school","In the park","At home"], 1]
     ]
   }
 ];
 
+// NAVIGATION
+
 function show(id) {
-  ["welcome","login","signup","home","lesson"]
-    .forEach(s => document.getElementById(s)
-      .classList.add("hidden"));
+  ["welcome","login","signup","home","lesson"].forEach(s => {
+    document.getElementById(s).classList.add("hidden");
+  });
+
   document.getElementById(id).classList.remove("hidden");
 }
 
+// LOGIN (DEMO ONLY)
+
 function enter() {
-  let email = document.getElementById("loginEmail").value;
+  let email = document.getElementById("loginEmail").value.trim();
   let pass = document.getElementById("loginPass").value;
 
   if (!email || !pass) {
@@ -200,12 +272,17 @@ function enter() {
 
   document.getElementById("player").textContent =
     email.split("@")[0];
+
+  document.getElementById("loginMsg").textContent = "";
+
   show("home");
 }
 
+// SIGN UP (DEMO ONLY)
+
 function register() {
-  let name = document.getElementById("newName").value;
-  let email = document.getElementById("newEmail").value;
+  let name = document.getElementById("newName").value.trim();
+  let email = document.getElementById("newEmail").value.trim();
   let pass = document.getElementById("newPass").value;
 
   if (!name || !email || !pass) {
@@ -215,6 +292,8 @@ function register() {
   }
 
   document.getElementById("player").textContent = name;
+  document.getElementById("signupMsg").textContent = "";
+
   show("home");
 }
 
@@ -222,19 +301,45 @@ function logout() {
   show("welcome");
 }
 
+// START LESSON WITH 5 RANDOM QUESTIONS
+
 function start(index) {
   current = index;
   questionIndex = 0;
-  show("lesson");
+
+  // Make a copy of the question bank
+  let bank = [...lessons[current].questions];
+
+  // Shuffle the questions randomly
+  for (let i = bank.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [bank[i], bank[j]] = [bank[j], bank[i]];
+  }
+
+  // Select only five questions
+  currentQuestions = bank.slice(0, 5);
+
   document.getElementById("lessonTitle").textContent =
     lessons[current].title;
+
+  show("lesson");
   loadQuestion();
 }
 
+// LOAD QUESTION
+
 function loadQuestion() {
-  let q = lessons[current].questions[questionIndex];
+  let q = currentQuestions[questionIndex];
+
+  document.getElementById("counter").textContent =
+    "Question " + (questionIndex + 1) + " of 5";
+
+  document.getElementById("bar").style.width =
+    ((questionIndex) / 5 * 100) + "%";
+
   document.getElementById("question").textContent = q[0];
   document.getElementById("feedback").textContent = "";
+
   document.getElementById("next").classList.add("hidden");
 
   let area = document.getElementById("answers");
@@ -242,48 +347,70 @@ function loadQuestion() {
 
   q[1].forEach((answer, i) => {
     let b = document.createElement("button");
+
     b.textContent = answer;
     b.className = "option";
     b.onclick = () => check(i);
+
     area.appendChild(b);
   });
 }
 
+// CHECK ANSWER
+
 function check(choice) {
-  let q = lessons[current].questions[questionIndex];
+  let q = currentQuestions[questionIndex];
   let feedback = document.getElementById("feedback");
 
   if (choice === q[2]) {
     feedback.textContent = "Correct! 🎉 +10 XP";
     xp += 10;
   } else {
-    feedback.textContent = "Not quite! Try the next question.";
+    feedback.textContent = "Not quite! The correct answer is: " + q[1][q[2]];
     hearts = Math.max(0, hearts - 1);
   }
 
   document.getElementById("xp").textContent = xp;
   document.getElementById("hearts").textContent = hearts;
 
-  document.querySelectorAll("#answers button")
-    .forEach(b => b.disabled = true);
+  document.querySelectorAll("#answers button").forEach(b => {
+    b.disabled = true;
+  });
 
   document.getElementById("next").classList.remove("hidden");
 }
 
+// NEXT QUESTION OR COMPLETE LESSON
+
 function nextQ() {
   questionIndex++;
 
-  if (questionIndex >= lessons[current].questions.length) {
+  if (questionIndex >= currentQuestions.length) {
     document.getElementById("question").textContent =
       "Lesson completed! Great job! 🏆";
+
     document.getElementById("answers").innerHTML = "";
+
     document.getElementById("feedback").textContent =
       "You earned " + xp + " XP in total!";
+
+    document.getElementById("counter").textContent =
+      "5 of 5 completed";
+
+    document.getElementById("bar").style.width = "100%";
+
     document.getElementById("next").classList.add("hidden");
+
   } else {
     loadQuestion();
   }
 }
+
+// ALWAYS SHOW WELCOME SCREEN AT START
+
+window.onload = function() {
+  show("welcome");
+};
 </script>
 
 </body>
