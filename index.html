@@ -69,6 +69,10 @@ button:disabled {
   color: #263238;
 }
 
+.option:hover {
+  background: #d5ebd0;
+}
+
 .hidden {
   display: none !important;
 }
@@ -196,6 +200,9 @@ let current = 0;
 let questionIndex = 0;
 let currentQuestions = [];
 
+// Stores the correct answer's new position
+let correctAnswerIndex = 0;
+
 // QUESTION BANKS
 
 const lessons = [
@@ -307,16 +314,16 @@ function start(index) {
   current = index;
   questionIndex = 0;
 
-  // Make a copy of the question bank
+  // Copy the question bank
   let bank = [...lessons[current].questions];
 
-  // Shuffle the questions randomly
+  // Shuffle the questions
   for (let i = bank.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i + 1));
     [bank[i], bank[j]] = [bank[j], bank[i]];
   }
 
-  // Select only five questions
+  // Select five random questions
   currentQuestions = bank.slice(0, 5);
 
   document.getElementById("lessonTitle").textContent =
@@ -326,7 +333,7 @@ function start(index) {
   loadQuestion();
 }
 
-// LOAD QUESTION
+// LOAD QUESTION AND SHUFFLE ANSWERS
 
 function loadQuestion() {
   let q = currentQuestions[questionIndex];
@@ -335,7 +342,7 @@ function loadQuestion() {
     "Question " + (questionIndex + 1) + " of 5";
 
   document.getElementById("bar").style.width =
-    ((questionIndex) / 5 * 100) + "%";
+    (questionIndex / 5 * 100) + "%";
 
   document.getElementById("question").textContent = q[0];
   document.getElementById("feedback").textContent = "";
@@ -345,10 +352,26 @@ function loadQuestion() {
   let area = document.getElementById("answers");
   area.innerHTML = "";
 
-  q[1].forEach((answer, i) => {
+  // Pair each answer with information about whether it is correct
+  let options = q[1].map((answer, i) => ({
+    text: answer,
+    correct: i === q[2]
+  }));
+
+  // Shuffle the answer options without losing the correct answer
+  for (let i = options.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+
+  // Find the new position of the correct answer
+  correctAnswerIndex = options.findIndex(option => option.correct);
+
+  // Display the shuffled options
+  options.forEach((option, i) => {
     let b = document.createElement("button");
 
-    b.textContent = answer;
+    b.textContent = option.text;
     b.className = "option";
     b.onclick = () => check(i);
 
@@ -359,21 +382,29 @@ function loadQuestion() {
 // CHECK ANSWER
 
 function check(choice) {
-  let q = currentQuestions[questionIndex];
   let feedback = document.getElementById("feedback");
 
-  if (choice === q[2]) {
+  let buttons = document.querySelectorAll("#answers button");
+
+  if (choice === correctAnswerIndex) {
     feedback.textContent = "Correct! 🎉 +10 XP";
     xp += 10;
   } else {
-    feedback.textContent = "Not quite! The correct answer is: " + q[1][q[2]];
+    let correctButton = buttons[correctAnswerIndex];
+
+    feedback.textContent =
+      "Not quite! The correct answer is: " +
+      correctButton.textContent;
+
     hearts = Math.max(0, hearts - 1);
   }
 
+  // Update XP and hearts
   document.getElementById("xp").textContent = xp;
   document.getElementById("hearts").textContent = hearts;
 
-  document.querySelectorAll("#answers button").forEach(b => {
+  // Prevent answering the same question multiple times
+  buttons.forEach(b => {
     b.disabled = true;
   });
 
