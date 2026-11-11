@@ -7,6 +7,8 @@
 <title>FastLearning</title>
 
 <style>
+* { box-sizing: border-box; }
+
 body {
   font-family: Arial, sans-serif;
   background: #f4f8f5;
@@ -24,7 +26,7 @@ header {
 }
 
 main {
-  max-width: 500px;
+  max-width: 520px;
   margin: 25px auto;
   padding: 15px;
 }
@@ -37,14 +39,12 @@ main {
   box-shadow: 0 3px 10px #ddd;
 }
 
-button, input {
-  width: 90%;
+button, input, select {
   padding: 13px;
   margin: 7px;
   border-radius: 10px;
   border: 1px solid #ccc;
   font-size: 16px;
-  box-sizing: border-box;
 }
 
 button {
@@ -55,26 +55,33 @@ button {
   cursor: pointer;
 }
 
-button:hover {
-  background: #46a302;
-}
+button:hover { background: #46a302; }
 
 button:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
+input, select { width: 90%; }
+
 .option {
   background: #eaf5e8;
   color: #263238;
 }
 
-.option:hover {
-  background: #d5ebd0;
+.option:hover { background: #d5ebd0; }
+
+.hidden { display: none !important; }
+
+.language-picker {
+  width: auto;
+  min-width: 170px;
+  background: white;
 }
 
-.hidden {
-  display: none !important;
+.language-label {
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
 #progress {
@@ -91,6 +98,65 @@ button:disabled {
   width: 0%;
   transition: width 0.3s;
 }
+
+.speak-btn {
+  width: auto;
+  min-width: 44px;
+  padding: 9px 12px;
+  margin: 4px;
+  background: #eaf5e8;
+  color: #263238;
+  border: 1px solid #cce5c5;
+  font-size: 18px;
+}
+
+.speak-btn:hover { background: #d5ebd0; }
+
+.question-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.question-line p { margin: 8px 0; }
+
+.answer-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 5px 0;
+}
+
+.answer-row .option {
+  flex: 1;
+  width: auto;
+  margin: 4px;
+}
+
+.answer-row .speak-btn {
+  flex: 0 0 48px;
+}
+
+#answers {
+  display: flex;
+  flex-direction: column;
+}
+
+.small-note {
+  color: #60736a;
+  font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  main {
+    margin: 12px auto;
+    padding: 10px;
+  }
+
+  .card { padding: 17px; }
+}
 </style>
 </head>
 
@@ -102,37 +168,62 @@ button:disabled {
 
 <!-- WELCOME -->
 <section id="welcome" class="card">
-  <h1>Welcome to FastLearning!</h1>
-  <p>Learn to read through fun games and activities.</p>
-  <h2>📚 Make learning fun!</h2>
+  <h1 data-i18n="welcomeTitle">Welcome to FastLearning!</h1>
+  <p data-i18n="welcomeText">
+    Learn to read through fun games and activities.
+  </p>
+  <h2 data-i18n="welcomeSubtitle">📚 Make learning fun!</h2>
 
-  <button onclick="show('login')">Log In</button>
-  <button onclick="show('signup')">Sign Up</button>
+  <button onclick="show('login')" data-i18n="login">Log In</button>
+  <button onclick="show('signup')" data-i18n="signup">Sign Up</button>
+
+  <p class="language-label" data-i18n="chooseLanguage">
+    Choose your language
+  </p>
+
+  <select id="welcomeLanguage"
+    class="language-picker"
+    onchange="changeLanguage(this.value)">
+    <option value="en">English</option>
+    <option value="es">Español</option>
+  </select>
 </section>
 
 <!-- LOG IN -->
 <section id="login" class="card hidden">
-  <h2>Log In</h2>
+  <h2 data-i18n="login">Log In</h2>
 
-  <input id="loginEmail" type="email" placeholder="Email">
-  <input id="loginPass" type="password" placeholder="Password">
+  <input id="loginEmail" type="email"
+    placeholder="Email" data-placeholder="email">
 
-  <button onclick="enter()">Log In</button>
-  <button class="option" onclick="show('welcome')">Back</button>
+  <input id="loginPass" type="password"
+    placeholder="Password" data-placeholder="password">
+
+  <button onclick="enter()" data-i18n="login">Log In</button>
+  <button class="option" onclick="show('welcome')" data-i18n="back">
+    Back
+  </button>
 
   <p id="loginMsg"></p>
 </section>
 
 <!-- SIGN UP -->
 <section id="signup" class="card hidden">
-  <h2>Create an Account</h2>
+  <h2 data-i18n="createAccount">Create an Account</h2>
 
-  <input id="newName" placeholder="Your name">
-  <input id="newEmail" type="email" placeholder="Email">
-  <input id="newPass" type="password" placeholder="Create password">
+  <input id="newName"
+    placeholder="Your name" data-placeholder="yourName">
 
-  <button onclick="register()">Sign Up</button>
-  <button class="option" onclick="show('welcome')">Back</button>
+  <input id="newEmail" type="email"
+    placeholder="Email" data-placeholder="email">
+
+  <input id="newPass" type="password"
+    placeholder="Create password" data-placeholder="createPassword">
+
+  <button onclick="register()" data-i18n="signup">Sign Up</button>
+  <button class="option" onclick="show('welcome')" data-i18n="back">
+    Back
+  </button>
 
   <p id="signupMsg"></p>
 </section>
@@ -141,35 +232,81 @@ button:disabled {
 <section id="home" class="hidden">
 
   <div class="card">
-    <h2>Hi, <span id="player">Learner</span>! 👋</h2>
-    <p>⭐ XP: <span id="xp">0</span></p>
-    <p>❤️ Hearts: <span id="hearts">5</span></p>
-    <p>Choose a lesson to begin!</p>
+
+    <p class="language-label" data-i18n="chooseLanguage">
+      Choose your language
+    </p>
+
+    <select id="homeLanguage"
+      class="language-picker"
+      onchange="changeLanguage(this.value)">
+      <option value="en">English</option>
+      <option value="es">Español</option>
+    </select>
+
+    <h2>
+      <span data-i18n="hi">Hi</span>,
+      <span id="player">Learner</span>! 👋
+    </h2>
+
+    <p>⭐ <span data-i18n="xp">XP</span>:
+      <span id="xp">0</span>
+    </p>
+
+    <p>❤️ <span data-i18n="hearts">Hearts</span>:
+      <span id="hearts">5</span>
+    </p>
+
+    <p data-i18n="chooseLesson">
+      Choose a lesson to begin!
+    </p>
   </div>
 
   <div class="card">
-    <h3>📖 Word Explorer</h3>
-    <p>Recognise words and pictures.</p>
-    <button onclick="start(0)">Start Lesson</button>
+    <h3>📖 <span data-i18n="wordExplorer">Word Explorer</span></h3>
+    <p data-i18n="wordExplorerDesc">
+      Recognise words and pictures.
+    </p>
+    <button onclick="start(0)" data-i18n="startLesson">
+      Start Lesson
+    </button>
   </div>
 
   <div class="card">
-    <h3>🔤 Word Builder</h3>
-    <p>Practise spelling and word building.</p>
-    <button onclick="start(1)">Start Lesson</button>
+    <h3>🔤 <span data-i18n="wordBuilder">Word Builder</span></h3>
+    <p data-i18n="wordBuilderDesc">
+      Practise spelling and word building.
+    </p>
+    <button onclick="start(1)" data-i18n="startLesson">
+      Start Lesson
+    </button>
   </div>
 
   <div class="card">
-    <h3>📚 Reading Adventure</h3>
-    <p>Practise reading and comprehension.</p>
-    <button onclick="start(2)">Start Lesson</button>
+    <h3>📚 <span data-i18n="readingAdventure">Reading Adventure</span></h3>
+    <p data-i18n="readingAdventureDesc">
+      Practise reading and comprehension.
+    </p>
+    <button onclick="start(2)" data-i18n="startLesson">
+      Start Lesson
+    </button>
   </div>
 
-  <button class="option" onclick="logout()">Log Out</button>
+  <button class="option" onclick="logout()" data-i18n="logout">
+    Log Out
+  </button>
 </section>
 
 <!-- LESSON -->
 <section id="lesson" class="card hidden">
+
+  <select id="lessonLanguage"
+    class="language-picker"
+    onchange="changeLanguage(this.value)">
+    <option value="en">English</option>
+    <option value="es">Español</option>
+  </select>
+
   <h2 id="lessonTitle">Lesson</h2>
 
   <p id="counter">Question 1 of 5</p>
@@ -178,102 +315,366 @@ button:disabled {
     <div id="bar"></div>
   </div>
 
-  <p id="question"></p>
+  <div class="question-line">
+    <p id="question"></p>
+
+    <button id="questionAudio"
+      class="speak-btn"
+      type="button"
+      onclick="speakCurrentQuestion()">
+      🔊
+    </button>
+  </div>
+
   <div id="answers"></div>
+
   <p id="feedback"></p>
 
-  <button id="next" class="hidden" onclick="nextQ()">
+  <button id="next"
+    class="hidden"
+    onclick="nextQ()"
+    data-i18n="continue">
     Continue
   </button>
 
-  <button id="exit" class="option" onclick="show('home')">
+  <button id="exit"
+    class="option"
+    onclick="show('home')"
+    data-i18n="exitLesson">
     Exit Lesson
   </button>
+
 </section>
+
+<p class="small-note" data-i18n="audioNote">
+  Audio uses the speech voices available on your device.
+</p>
 
 </main>
 
 <script>
+
 let xp = 0;
 let hearts = 5;
 let current = 0;
 let questionIndex = 0;
 let currentQuestions = [];
-
-// Stores the correct answer's new position
 let correctAnswerIndex = 0;
+let language = "en";
+let answered = false;
+
+// TRANSLATIONS
+
+const translations = {
+
+  en: {
+    welcomeTitle: "Welcome to FastLearning!",
+    welcomeText: "Learn to read through fun games and activities.",
+    welcomeSubtitle: "📚 Make learning fun!",
+    login: "Log In",
+    signup: "Sign Up",
+    chooseLanguage: "Choose your language",
+    createAccount: "Create an Account",
+    back: "Back",
+    email: "Email",
+    password: "Password",
+    yourName: "Your name",
+    createPassword: "Create password",
+    hi: "Hi",
+    xp: "XP",
+    hearts: "Hearts",
+    chooseLesson: "Choose a lesson to begin!",
+    wordExplorer: "Word Explorer",
+    wordBuilder: "Word Builder",
+    readingAdventure: "Reading Adventure",
+    wordExplorerDesc: "Recognise words and pictures.",
+    wordBuilderDesc: "Practise spelling and word building.",
+    readingAdventureDesc: "Practise reading and comprehension.",
+    startLesson: "Start Lesson",
+    logout: "Log Out",
+    continue: "Continue",
+    exitLesson: "Exit Lesson",
+    question: "Question",
+    of: "of",
+    correct: "Correct! 🎉 +10 XP",
+    notQuite: "Not quite! The correct answer is: ",
+    completed: "Lesson completed! Great job! 🏆",
+    totalXP: "You earned {xp} XP in total!",
+    completedCount: "5 of 5 completed",
+    enterDetails: "Please enter your email and password.",
+    completeFields: "Please complete all fields.",
+    audioNote: "Audio uses the speech voices available on your device."
+  },
+
+  es: {
+    welcomeTitle: "¡Bienvenido a FastLearning!",
+    welcomeText: "Aprende a leer mediante juegos y actividades divertidas.",
+    welcomeSubtitle: "📚 ¡Haz que aprender sea divertido!",
+    login: "Iniciar sesión",
+    signup: "Registrarse",
+    chooseLanguage: "Elige tu idioma",
+    createAccount: "Crear una cuenta",
+    back: "Volver",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    yourName: "Tu nombre",
+    createPassword: "Crea una contraseña",
+    hi: "¡Hola",
+    xp: "XP",
+    hearts: "Vidas",
+    chooseLesson: "¡Elige una actividad para comenzar!",
+    wordExplorer: "Explorador de palabras",
+    wordBuilder: "Constructor de palabras",
+    readingAdventure: "Aventura de lectura",
+    wordExplorerDesc: "Reconoce palabras e imágenes.",
+    wordBuilderDesc: "Practica la ortografía y la formación de palabras.",
+    readingAdventureDesc: "Practica la lectura y la comprensión.",
+    startLesson: "Comenzar actividad",
+    logout: "Cerrar sesión",
+    continue: "Continuar",
+    exitLesson: "Salir de la actividad",
+    question: "Pregunta",
+    of: "de",
+    correct: "¡Correcto! 🎉 +10 XP",
+    notQuite: "¡Casi! La respuesta correcta es: ",
+    completed: "¡Actividad completada! ¡Buen trabajo! 🏆",
+    totalXP: "¡Has ganado {xp} XP en total!",
+    completedCount: "5 de 5 completadas",
+    enterDetails: "Por favor, introduce tu correo y contraseña.",
+    completeFields: "Por favor, completa todos los campos.",
+    audioNote: "El audio utiliza las voces disponibles en tu dispositivo."
+  }
+
+};
 
 // QUESTION BANKS
 
-const lessons = [
-  {
-    title: "Word Explorer",
-    questions: [
-      ["Which word is a fruit?", ["Apple","Chair","Book"], 0],
-      ["Which word is an animal?", ["Table","Tiger","Pencil"], 1],
-      ["Which word means happy?", ["Joyful","Sad","Angry"], 0],
-      ["Which word is a colour?", ["Purple","Window","Bread"], 0],
-      ["Which word is a body part?", ["Elbow","Cloud","Bottle"], 0],
-      ["Which word is a school object?", ["Pencil","Banana","Tiger"], 0],
-      ["Which word is a vehicle?", ["Bicycle","Giraffe","Flower"], 0],
-      ["Which word means the opposite of hot?", ["Cold","Warm","Sunny"], 0],
-      ["Which word is an emotion?", ["Excited","Table","Spoon"], 0],
-      ["Which word is a place?", ["Library","Apple","Rabbit"], 0]
-    ]
-  },
+const lessonData = [
+
+  // WORD EXPLORER
 
   {
-    title: "Word Builder",
-    questions: [
-      ["Which syllables form 'sunset'?", ["Sun + set","Su + net","S + unset"], 0],
-      ["Complete the word: Ba__na", ["nana","mama","tata"], 0],
-      ["Which word has two syllables?", ["Cat","Rabbit","Sun"], 1],
-      ["Complete the word: Ap__e", ["pl","bl","tr"], 0],
-      ["Which syllables form 'basket'?", ["Bas + ket","Ba + sket","B + asket"], 0],
-      ["Complete the word: Pi__za", ["z","zz","ss"], 1],
-      ["Which word has three syllables?", ["Elephant","Cat","Dog"], 0],
-      ["Which letters complete 'ch__r'?", ["ai","oa","ee"], 0],
-      ["Which syllables form 'rainbow'?", ["Rain + bow","Ra + inbow","R + ainbow"], 0],
-      ["Complete the word: Mon__y", ["ke","ca","ti"], 0]
-    ]
+    key: "wordExplorer",
+
+    questions: {
+
+      en: [
+        ["Which word is a fruit?", ["Apple","Chair","Book"], 0],
+        ["Which word is an animal?", ["Table","Tiger","Pencil"], 1],
+        ["Which word means happy?", ["Joyful","Sad","Angry"], 0],
+        ["Which word is a colour?", ["Purple","Window","Bread"], 0],
+        ["Which word is a body part?", ["Elbow","Cloud","Bottle"], 0],
+        ["Which word is a school object?", ["Pencil","Banana","Tiger"], 0],
+        ["Which word is a vehicle?", ["Bicycle","Giraffe","Flower"], 0],
+        ["Which word means the opposite of hot?", ["Cold","Warm","Sunny"], 0],
+        ["Which word is an emotion?", ["Excited","Table","Spoon"], 0],
+        ["Which word is a place?", ["Library","Apple","Rabbit"], 0]
+      ],
+
+      es: [
+        ["¿Cuál de estas palabras es una fruta?", ["Manzana","Silla","Libro"], 0],
+        ["¿Cuál de estas palabras es un animal?", ["Mesa","Tigre","Lápiz"], 1],
+        ["¿Qué palabra significa estar feliz?", ["Alegre","Triste","Enojado"], 0],
+        ["¿Cuál de estas palabras es un color?", ["Morado","Ventana","Pan"], 0],
+        ["¿Cuál de estas palabras es una parte del cuerpo?", ["Codo","Nube","Botella"], 0],
+        ["¿Cuál de estas palabras es un objeto escolar?", ["Lápiz","Banana","Tigre"], 0],
+        ["¿Cuál de estas palabras es un vehículo?", ["Bicicleta","Jirafa","Flor"], 0],
+        ["¿Qué palabra es lo contrario de caliente?", ["Frío","Tibio","Soleado"], 0],
+        ["¿Cuál de estas palabras es una emoción?", ["Emocionado","Mesa","Cuchara"], 0],
+        ["¿Cuál de estas palabras es un lugar?", ["Biblioteca","Manzana","Conejo"], 0]
+      ]
+
+    }
   },
 
+  // WORD BUILDER
+
   {
-    title: "Reading Adventure",
-    questions: [
-      ["Tom has a red ball. What colour is the ball?", ["Blue","Red","Green"], 1],
-      ["Sara reads a book. What does Sara read?", ["A book","A ball","A car"], 0],
-      ["The dog runs fast. Who runs?", ["The cat","The dog","The boy"], 1],
-      ["It is raining. What should Mia use?", ["An umbrella","Sunglasses","A fan"], 0],
-      ["Leo eats breakfast in the morning. When does he eat?", ["Morning","Night","Afternoon"], 0],
-      ["The bird flies in the sky. Where is the bird?", ["In the sky","Under the sea","In a car"], 0],
-      ["Ana has three apples. How many apples does she have?", ["Two","Three","Five"], 1],
-      ["The cat sleeps on the sofa. Where does it sleep?", ["On the sofa","In the garden","On a tree"], 0],
-      ["Ben wears a coat because it is cold. Why does he wear it?", ["Because it is cold","Because it is hot","Because it is sunny"], 0],
-      ["The children play in the park. Where are they?", ["At school","In the park","At home"], 1]
-    ]
+    key: "wordBuilder",
+
+    questions: {
+
+      en: [
+        ["Which syllables form 'sunset'?", ["Sun + set","Su + net","S + unset"], 0],
+        ["Complete the word: Ba__na", ["nana","mama","tata"], 0],
+        ["Which word has two syllables?", ["Cat","Rabbit","Sun"], 1],
+        ["Complete the word: Ap__e", ["pl","bl","tr"], 0],
+        ["Which syllables form 'basket'?", ["Bas + ket","Ba + sket","B + asket"], 0],
+        ["Complete the word: Pi__a", ["z","zz","ss"], 1],
+        ["Which word has three syllables?", ["Elephant","Cat","Dog"], 0],
+        ["Which letters complete 'ch__r'?", ["ai","oa","ee"], 0],
+        ["Which syllables form 'rainbow'?", ["Rain + bow","Ra + inbow","R + ainbow"], 0],
+        ["Complete the word: Mon__y", ["ke","ca","ti"], 0]
+      ],
+
+      es: [
+        ["¿Qué sílabas forman la palabra «mariposa»?", ["Ma + ri + po + sa","Mari + posa","Mar + iposa"], 0],
+        ["Completa la palabra: Ca__a", ["sa","ta","pa"], 0],
+        ["¿Cuál de estas palabras tiene dos sílabas?", ["Sol","Casa","Pan"], 1],
+        ["Completa la palabra: Pe__o", ["rr","ll","ss"], 0],
+        ["¿Qué sílabas forman la palabra «zapato»?", ["Za + pa + to","Zap + ato","Za + pato"], 0],
+        ["Completa la palabra: Ve__ana", ["nt","mp","st"], 0],
+        ["¿Cuál de estas palabras tiene tres sílabas?", ["Mariposa","Sol","Flor"], 0],
+        ["¿Qué letras completan «co__e» para formar «coche»?", ["ch","ll","rr"], 0],
+        ["¿Qué sílabas forman la palabra «pelota»?", ["Pe + lo + ta","Pel + ota","Pe + lota"], 0],
+        ["Completa la palabra: Ma__ana", ["ñ","ll","rr"], 0]
+      ]
+
+    }
+  },
+
+  // READING ADVENTURE
+
+  {
+    key: "readingAdventure",
+
+    questions: {
+
+      en: [
+        ["Tom has a red ball. What colour is the ball?", ["Blue","Red","Green"], 1],
+        ["Sara reads a book. What does Sara read?", ["A book","A ball","A car"], 0],
+        ["The dog runs fast. Who runs?", ["The cat","The dog","The boy"], 1],
+        ["It is raining. What should Mia use?", ["An umbrella","Sunglasses","A fan"], 0],
+        ["Leo eats breakfast in the morning. When does he eat?", ["Morning","Night","Afternoon"], 0],
+        ["The bird flies in the sky. Where is the bird?", ["In the sky","Under the sea","In a car"], 0],
+        ["Ana has three apples. How many apples does she have?", ["Two","Three","Five"], 1],
+        ["The cat sleeps on the sofa. Where does it sleep?", ["On the sofa","In the garden","On a tree"], 0],
+        ["Ben wears a coat because it is cold. Why does he wear it?", ["Because it is cold","Because it is hot","Because it is sunny"], 0],
+        ["The children play in the park. Where are they?", ["At school","In the park","At home"], 1]
+      ],
+
+      es: [
+        ["Tom tiene una pelota roja. ¿De qué color es la pelota?", ["Azul","Rojo","Verde"], 1],
+        ["Sara lee un libro. ¿Qué lee Sara?", ["Un libro","Una pelota","Un auto"], 0],
+        ["El perro corre rápido. ¿Quién corre?", ["El gato","El perro","El niño"], 1],
+        ["Está lloviendo. ¿Qué debería usar Mia?", ["Un paraguas","Gafas de sol","Un ventilador"], 0],
+        ["Leo desayuna por la mañana. ¿Cuándo come?", ["Por la mañana","Por la noche","Por la tarde"], 0],
+        ["El pájaro vuela por el cielo. ¿Dónde está el pájaro?", ["En el cielo","Debajo del mar","En un auto"], 0],
+        ["Ana tiene tres manzanas. ¿Cuántas manzanas tiene?", ["Dos","Tres","Cinco"], 1],
+        ["El gato duerme en el sofá. ¿Dónde duerme?", ["En el sofá","En el jardín","En un árbol"], 0],
+        ["Ben lleva un abrigo porque hace frío. ¿Por qué lo lleva?", ["Porque hace frío","Porque hace calor","Porque hace sol"], 0],
+        ["Los niños juegan en el parque. ¿Dónde están?", ["En la escuela","En el parque","En casa"], 1]
+      ]
+
+    }
   }
+
 ];
+
+// TRANSLATION FUNCTION
+
+function t(key) {
+  return translations[language][key] || key;
+}
+
+// UPDATE ALL TEXT
+
+function updateStaticText() {
+
+  document.documentElement.lang = language;
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+
+  document.querySelectorAll("[data-placeholder]").forEach(el => {
+    el.placeholder = t(el.getAttribute("data-placeholder"));
+  });
+
+  ["welcomeLanguage", "homeLanguage", "lessonLanguage"].forEach(id => {
+    const picker = document.getElementById(id);
+    if (picker) picker.value = language;
+  });
+
+}
+
+// CHANGE LANGUAGE
+
+function changeLanguage(newLanguage) {
+
+  if (!translations[newLanguage]) return;
+
+  language = newLanguage;
+
+  updateStaticText();
+
+  if (!document.getElementById("lesson").classList.contains("hidden")) {
+
+    // Keep the same question number when changing language.
+    if (questionIndex < currentQuestions.length) {
+      loadQuestion();
+    }
+
+  }
+
+}
+
+// AUDIO PRONUNCIATION
+
+function speak(text) {
+
+  if (!("speechSynthesis" in window)) {
+
+    alert(language === "es"
+      ? "Tu navegador no admite la función de audio."
+      : "Your browser does not support audio.");
+
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  utterance.lang = language === "es" ? "es-ES" : "en-US";
+
+  utterance.rate = 0.85;
+
+  window.speechSynthesis.speak(utterance);
+
+}
+
+// SPEAK QUESTION
+
+function speakCurrentQuestion() {
+
+  const q = currentQuestions[questionIndex];
+
+  if (q) {
+    speak(q[0]);
+  }
+
+}
 
 // NAVIGATION
 
 function show(id) {
-  ["welcome","login","signup","home","lesson"].forEach(s => {
-    document.getElementById(s).classList.add("hidden");
+
+  ["welcome", "login", "signup", "home", "lesson"].forEach(section => {
+    document.getElementById(section).classList.add("hidden");
   });
 
   document.getElementById(id).classList.remove("hidden");
+
+  if (id !== "lesson" && "speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+
 }
 
-// LOGIN (DEMO ONLY)
+// LOG IN - DEMO ONLY
 
 function enter() {
-  let email = document.getElementById("loginEmail").value.trim();
-  let pass = document.getElementById("loginPass").value;
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPass").value;
 
   if (!email || !pass) {
+
     document.getElementById("loginMsg").textContent =
-      "Please enter your email and password.";
+      t("enterDetails");
+
     return;
   }
 
@@ -283,165 +684,258 @@ function enter() {
   document.getElementById("loginMsg").textContent = "";
 
   show("home");
+
 }
 
-// SIGN UP (DEMO ONLY)
+// SIGN UP - DEMO ONLY
 
 function register() {
-  let name = document.getElementById("newName").value.trim();
-  let email = document.getElementById("newEmail").value.trim();
-  let pass = document.getElementById("newPass").value;
+
+  const name = document.getElementById("newName").value.trim();
+  const email = document.getElementById("newEmail").value.trim();
+  const pass = document.getElementById("newPass").value;
 
   if (!name || !email || !pass) {
+
     document.getElementById("signupMsg").textContent =
-      "Please complete all fields.";
+      t("completeFields");
+
     return;
   }
 
   document.getElementById("player").textContent = name;
+
   document.getElementById("signupMsg").textContent = "";
 
   show("home");
+
 }
+
+// LOG OUT
 
 function logout() {
-  show("welcome");
-}
 
-// START LESSON WITH 5 RANDOM QUESTIONS
-
-function start(index) {
-  current = index;
-  questionIndex = 0;
-
-  // Copy the question bank
-  let bank = [...lessons[current].questions];
-
-  // Shuffle the questions
-  for (let i = bank.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [bank[i], bank[j]] = [bank[j], bank[i]];
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
   }
 
-  // Select five random questions
+  show("welcome");
+
+}
+
+// START LESSON
+
+function start(index) {
+
+  current = index;
+  questionIndex = 0;
+  answered = false;
+
+  // Get questions in the selected language.
+  const bank = [...lessonData[current].questions[language]];
+
+  // Shuffle questions.
+  for (let i = bank.length - 1; i > 0; i--) {
+
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [bank[i], bank[j]] = [bank[j], bank[i]];
+
+  }
+
+  // Select five random questions.
   currentQuestions = bank.slice(0, 5);
 
   document.getElementById("lessonTitle").textContent =
-    lessons[current].title;
+    t(lessonData[current].key);
 
   show("lesson");
+
   loadQuestion();
+
 }
 
-// LOAD QUESTION AND SHUFFLE ANSWERS
+// LOAD QUESTION
 
 function loadQuestion() {
-  let q = currentQuestions[questionIndex];
+
+  const q = currentQuestions[questionIndex];
+
+  answered = false;
+
+  document.getElementById("lessonTitle").textContent =
+    t(lessonData[current].key);
 
   document.getElementById("counter").textContent =
-    "Question " + (questionIndex + 1) + " of 5";
+    `${t("question")} ${questionIndex + 1} ${t("of")} 5`;
 
   document.getElementById("bar").style.width =
     (questionIndex / 5 * 100) + "%";
 
   document.getElementById("question").textContent = q[0];
+
   document.getElementById("feedback").textContent = "";
 
   document.getElementById("next").classList.add("hidden");
 
-  let area = document.getElementById("answers");
+  document.getElementById("questionAudio").classList.remove("hidden");
+
+  const area = document.getElementById("answers");
+
   area.innerHTML = "";
 
-  // Pair each answer with information about whether it is correct
-  let options = q[1].map((answer, i) => ({
+  // Pair answers with their correct/incorrect status.
+  const options = q[1].map((answer, i) => ({
     text: answer,
     correct: i === q[2]
   }));
 
-  // Shuffle the answer options without losing the correct answer
+  // Shuffle answers.
   for (let i = options.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
+
+    const j = Math.floor(Math.random() * (i + 1));
+
     [options[i], options[j]] = [options[j], options[i]];
+
   }
 
-  // Find the new position of the correct answer
-  correctAnswerIndex = options.findIndex(option => option.correct);
+  // Find the new correct answer position.
+  correctAnswerIndex =
+    options.findIndex(option => option.correct);
 
-  // Display the shuffled options
+  // Display answers with audio buttons.
   options.forEach((option, i) => {
-    let b = document.createElement("button");
 
-    b.textContent = option.text;
-    b.className = "option";
-    b.onclick = () => check(i);
+    const row = document.createElement("div");
 
-    area.appendChild(b);
+    row.className = "answer-row";
+
+    const answerButton = document.createElement("button");
+
+    answerButton.textContent = option.text;
+
+    answerButton.className = "option";
+
+    answerButton.type = "button";
+
+    answerButton.onclick = () => check(i);
+
+    const audioButton = document.createElement("button");
+
+    audioButton.textContent = "🔊";
+
+    audioButton.className = "speak-btn";
+
+    audioButton.type = "button";
+
+    audioButton.setAttribute(
+      "aria-label",
+      language === "es" ? "Escuchar respuesta" : "Listen to answer"
+    );
+
+    audioButton.onclick = () => speak(option.text);
+
+    row.appendChild(answerButton);
+
+    row.appendChild(audioButton);
+
+    area.appendChild(row);
+
   });
+
+  document.getElementById("questionAudio").setAttribute(
+    "aria-label",
+    language === "es" ? "Escuchar pregunta" : "Listen to question"
+  );
+
 }
 
 // CHECK ANSWER
 
 function check(choice) {
-  let feedback = document.getElementById("feedback");
 
-  let buttons = document.querySelectorAll("#answers button");
+  if (answered) return;
+
+  answered = true;
+
+  const feedback = document.getElementById("feedback");
+
+  const answerButtons =
+    document.querySelectorAll("#answers .option");
 
   if (choice === correctAnswerIndex) {
-    feedback.textContent = "Correct! 🎉 +10 XP";
+
+    feedback.textContent = t("correct");
+
     xp += 10;
+
   } else {
-    let correctButton = buttons[correctAnswerIndex];
 
     feedback.textContent =
-      "Not quite! The correct answer is: " +
-      correctButton.textContent;
+      t("notQuite") +
+      answerButtons[correctAnswerIndex].textContent;
 
     hearts = Math.max(0, hearts - 1);
+
   }
 
-  // Update XP and hearts
+  // Update XP and hearts.
   document.getElementById("xp").textContent = xp;
+
   document.getElementById("hearts").textContent = hearts;
 
-  // Prevent answering the same question multiple times
-  buttons.forEach(b => {
-    b.disabled = true;
+  // Prevent multiple answers.
+  answerButtons.forEach(button => {
+    button.disabled = true;
   });
 
   document.getElementById("next").classList.remove("hidden");
+
 }
 
-// NEXT QUESTION OR COMPLETE LESSON
+// NEXT QUESTION
 
 function nextQ() {
+
   questionIndex++;
 
   if (questionIndex >= currentQuestions.length) {
+
     document.getElementById("question").textContent =
-      "Lesson completed! Great job! 🏆";
+      t("completed");
+
+    document.getElementById("questionAudio").classList.add("hidden");
 
     document.getElementById("answers").innerHTML = "";
 
     document.getElementById("feedback").textContent =
-      "You earned " + xp + " XP in total!";
+      t("totalXP").replace("{xp}", xp);
 
     document.getElementById("counter").textContent =
-      "5 of 5 completed";
+      t("completedCount");
 
     document.getElementById("bar").style.width = "100%";
 
     document.getElementById("next").classList.add("hidden");
 
   } else {
+
     loadQuestion();
+
   }
+
 }
 
-// ALWAYS SHOW WELCOME SCREEN AT START
+// START APP
 
 window.onload = function() {
+
+  updateStaticText();
+
   show("welcome");
+
 };
+
 </script>
 
 </body>
